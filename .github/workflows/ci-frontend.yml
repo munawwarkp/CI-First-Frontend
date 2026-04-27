@@ -1,0 +1,65 @@
+name: Frontend-CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request: 
+    branches: [main]
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  frontend-ci:
+    name: React Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run lint
+        run: npm run lint
+
+      - name: Build React app
+        run: npm run build
+
+  build-artifacts:
+    name: Build Release Artifacts
+    needs: [frontend-ci]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production app
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-package
+          path: dist
+          retention-days: 30

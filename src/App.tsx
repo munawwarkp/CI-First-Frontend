@@ -36,6 +36,7 @@ function App() {
       <section id="center">
         <div>
           <h1>Get started CI</h1>
+          <p> Go for CD </p>
         {products.map((item) => (
         <p key={item.id}>{item.productName} | {item.brand}</p>
       ))}
